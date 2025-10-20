@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 
+	"github.com/google/uuid"
 	ssov2 "github.com/ozzus/auth-protos/gen/go/auth"
 
 	"google.golang.org/grpc"
@@ -10,6 +11,20 @@ import (
 
 type serverAPI struct {
 	ssov2.UnimplementedAuthServer
+	auth Auth
+}
+
+type Auth interface {
+	Login(
+		ctx context.Context,
+		email string,
+		password string,
+	) (token string, err error)
+	RegisterNewUser(
+		ctx context.Context,
+		email string,
+		password string,
+	) (userID uuid.UUID, err error)
 }
 
 func Register(gRPCServer *grpc.Server) {

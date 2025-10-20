@@ -1,10 +1,15 @@
 package main
 
 import (
+	"fmt"
 	"log/slog"
 	"os"
+
 	"ozzus/auth-repository/internal/app"
 	"ozzus/auth-repository/internal/config"
+	"ozzus/auth-repository/internal/lib/logger/slogpretty"
+
+	"github.com/joho/godotenv"
 )
 
 func main() {
@@ -12,8 +17,15 @@ func main() {
 	log := setupLogger(cfg.Env)
 	log.Info("starting application")
 
-	application := app.New(log, cfg.GRPC.Port, dsn, cfg.TokenTTL)
+	if err := godotenv.Load(); err != nil {
+		panic(err)
+	}
+
+	dsn := fmt.Sprintf("postgresql://postgres:%s@db.qdsaggkokumsosfwekae.supabase.co:5432/postgres", os.Getenv("DB_PASS"))
+	application := app.New(log, cfg.GRPC.Port, dsn, cfg.TokenTTL, os.Getenv("APP_SECRET"))
+
 	application.GRPCServer.MustRun()
+	log.Info("db connected")
 }
 
 const (
@@ -39,4 +51,16 @@ func setupLogger(env string) *slog.Logger {
 	}
 
 	return log
+}
+
+func setupPrettySlog() *slog.Logger {
+	opts := slogpretty.PrettyHandlerOptions{
+		SlogOpts: &slog.HandlerOptions{
+			Level: slog.LevelDebug,
+		},
+	}
+
+	handler := opts.NewPrettyHandler(os.Stdout)
+
+	return slog.New(handler)
 }

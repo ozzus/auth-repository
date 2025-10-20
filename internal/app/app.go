@@ -11,7 +11,8 @@ type App struct {
 	GRPCServer *grpcapp.App
 }
 
-func New(log *slog.Logger, grpcPort int, storagePath string, tokenTTL time.Duration) *App {
+func New(log *slog.Logger, grpcPort int, storagePath string, tokenTTL time.Duration, appSecret string) *App {
+
 	grpcApp := grpcapp.New(log, grpcPort)
 
 	return &App{
