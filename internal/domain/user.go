@@ -1,19 +1,24 @@
 package domain
 
 import (
-	"context"
+	"time"
 
 	"github.com/google/uuid"
 )
 
-type User struct {
-	ID       uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
-	Email    string    `gorm:"unique;not null"`
-	PassHash []byte    `gorm:"not null"`
-}
+type Role string
 
-type UserRepository interface {
-	SaveUser(ctx context.Context, user *User) (uid uuid.UUID, err error)
-	User(ctx context.Context, email string) (User, error)
-	IsAdmin(ctx context.Context, uid uuid.UUID) (bool, error)
+const (
+	UserRoleUnspecified Role = "UNSPECIFIED"
+	UserRoleUser        Role = "USER"
+	UserRoleAdmin       Role = "ADMIN"
+)
+
+type User struct {
+	ID        uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
+	Email     string    `gorm:"unique;not null"`
+	PassHash  []byte    `gorm:"not null"`
+	Role      Role      `gorm:"not null"`
+	CreatedAt time.Time `gorm:"created_at"`
+	UpdateAt  time.Time `gorm:"updated_at"`
 }
